@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>=Wordle Pro</title>
+<link rel="icon" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  <rect x='0'   y='0'   width='33' height='33' fill='%23ffffff'/>
+  <rect x='33'  y='0'   width='33' height='33' fill='%23ffffff'/>
+  <rect x='66'  y='0'   width='34' height='33' fill='%23ffffff'/>
+
+  <rect x='0'   y='33'  width='33' height='33' fill='%23ffffff'/>
+  <rect x='33'  y='33'  width='33' height='33' fill='%23c9b458'/>
+  <rect x='66'  y='33'  width='34' height='33' fill='%236aaa64'/>
+
+  <rect x='0'   y='66'  width='33' height='34' fill='%236aaa64'/>
+  <rect x='33'  y='66'  width='33' height='34' fill='%236aaa64'/>
+  <rect x='66'  y='66'  width='34' height='34' fill='%236aaa64'/>
+</svg>">
+
+<style>
+  body {
+    background: #121213;
+    color: #eee;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+  }
+  h1 {
+    margin-bottom: 1rem;
+  }
+  .board {
+    display: grid;
+    grid-template-rows: repeat(6, 60px);
+    gap: 5px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(5, 60px);
+    gap: 5px;
+  }
+  .cell {
+    width: 60px;
+    height: 60px;
+    background: #3a3a3c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-radius: 5px;
+    perspective: 1000px;
+  }
+  .cell.flip {
+    animation: flip 0.5s forwards;
+  }
+  @keyframes flip {
+    0% { transform: rotateX(0deg); }
+    50% { transform: rotateX(90deg); background: #3a3a3c; }
+    100% { transform: rotateX(0deg); }
+  }
+  .cell.correct { background: #538d4e; }
+  .cell.present { background: #b59f3b; }
+  .cell.absent { background: #3a3a3c; opacity: 0.7; }
+  .keyboard {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(10, 40px);
+    gap: 5px;
+    justify-content: center;
+  }
+  .key {
+    padding: 0.5rem;
+    background: #818384;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+  }
+  .key.wide { grid-column: span 2; }
+  .key.correct { background: #538d4e; }
+  .key.present { background: #b59f3b; }
+  .key.absent { background: #3a3a3c; opacity: 0.7; }
+  #message {
+    margin-top: 1rem;
+    height: 1.5rem;
+  }
+  
+  /* Credits button */
+#credits-btn {
+  position: fixed;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.6;
+  cursor: pointer;
+  user-select: none;
+}
+
+#credits-btn:hover {
+  opacity: 1;
+}
+
+/* Overlay */
+#credits-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Popup */
+#credits-popup {
+  background: #111;
+  border: 1px solid #333;
+  padding: 20px 30px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+#credits-popup h2 {
+  margin-top: 0;
+}
+
+#credits-popup a {
+  color: #6aaa64;
+  text-decoration: none;
+}
+
+#credits-popup a:hover {
+  text-decoration: underline;
+}
+
+/* End game overlay */
+#end-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+#end-popup {
+  background: #111;
+  border: 1px solid #333;
+  padding: 24px 32px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+#end-popup button {
+  margin-top: 15px;
+  padding: 8px 18px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #6aaa64;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+}
+
+#end-popup button:hover {
+  filter: brightness(1.1);
+}
+
+</style>
+</head>
+<body>
+<h1>Wordle Pro</h1>
+<div class="board" id="board"></div>
+<p id="message"></p>
+<div class="keyboard" id="keyboard"></div>
+
+<!-- Credits button -->
+<div id="credits-btn">Credits</div>
+
+<!-- Credits popup overlay -->
+<div id="credits-overlay">
+  <div id="credits-popup">
+    <h2>CREDITS</h2>
+    <p>
+      <a href="https://github.com/LEBRONGOAT2323" target="_blank">LEBRONGOAT2323 - Creater</a><br>
+      <a href="https://github.com/prashilshah98/wordle-list" target="_blank">prashilshah98 - Word List</a><br>
+      <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank">Wordle - Orignal Wordle Game</a>
+    </p>
+  </div>
+</div>
+
+<!-- End Game Overlay -->
+<div id="end-overlay">
+  <div id="end-popup">
+    <h2 id="end-title"></h2>
+    <p id="end-stats"></p>
+    <button id="retry-btn">Try Again</button>
+  </div>
+</div>
+
+<script>
+
+let currentRow = 0;
+let currentCol = 0;
+const maxRows = 6;
+const maxCols = 5;
+
+  // popup elements
+const endOverlay = document.getElementById("end-overlay");
+const endTitle = document.getElementById("end-title");
+const endStats = document.getElementById("end-stats");
+const retryBtn = document.getElementById("retry-btn");
+
+// show popup
+function showEndPopup(won) {
+  const tries = currentRow + (won ? 1 : 0);
+  endTitle.textContent = won ? "🎉 You Win!" : "💀 Game Over";
+  endStats.textContent = `Solved in ${tries} / ${maxRows} tries`;
+  endOverlay.style.display = "flex";
+}
+
+// reset game
+function resetGame() {
+  endOverlay.style.display = "none";
+
+  targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+
+
+  currentRow = 0;
+  currentCol = 0;
+
+  [...board.children].forEach(row => {
+    [...row.children].forEach(cell => {
+      cell.textContent = "";
+      cell.className = "cell";
+    });
+  });
+
+  [...keyboardEl.children].forEach(key => {
+    key.classList.remove("correct", "present", "absent");
+  });
+
+  message.textContent = "";
+}
+
+retryBtn.addEventListener("click", resetGame);
+  
+  const WORDS = [
+  "abide","abhor","abode","abuse","about","above","acorn","acrid","adage","adapt",
+  "adept","admit","adobe","adore","adult","afire","afoul","again","agent","agape",
+  "agile","agony","alibi","alien","align","alley","alike","alive","alloy","allow",
+  "alone","along","aloof","altar","amber","amend","amity","ample","among","amuse",
+  "angle","angry","antic","anode","antic","apnea","apart","apple","apron","arena",
+  "argue","arise","armor","arson","artsy","asset","atlas","atone","audit","audio",
+  "avert","award","awash","awake","aware","awful","axial","azure","bacon","badge",
+  "bagel","baker","baler","balmy","bawdy","beach","beady","beard","beast","began",
+  "begun","being","belch","belie","belly","bench","berry","beret","beset","betel",
+  "bicep","bingo","birch","birth","bison","biter","blame","blast","bleak","bleed",
+  "blend","bless","blimp","blink","bliss","bloke","blown","blurb","board","boast",
+  "boney","bonus","booth","bough","boule","bound","bowel","boxer","brake","brand",
+  "brave","brawl","bread","break","breed","briar","bribe","brief","bring","brine",
+  "broil","broad","broth","brown","brunt","brush","bused","busty","butte","buyer",
+  "cabal","cairn","candy","canon","caper","caput","carat","cargo","carve","catch",
+  "cause","cavil","cedar","cease","cecil","cello","cider","civil","claim","clamp",
+  "clank","clash","class","clasp","clean","clear","cleft","climb","cling","clout",
+  "clown","clued","coach","coast","cobra","colon","comet","comic","condo","conch",
+  "conic","copse","couch","court","cover","covet","covey","crawl","creak","cream",
+  "credo","creep","crepe","cried","crime","crimp","crisp","croak","croup","crude",
+  "cruel","crush","crust","crypt","cubic","cumin","cunny","curio","curly","curse",
+  "cutie","cyber","datum","debar","debit","decay","decor","decal","decry","debut",
+  "defer","delay","demon","denim","dense","depot","derby","deter","devil","diary",
+  "dingo","diner","dirty","disco","ditch","diver","dodge","doing","doubt","dough",
+  "droit","droll","drain","drake","drift","drink","drive","drove","dryer","druid",
+  "drunk","dully","duchy","duvet","dwelt","dying","eager","easel","edict","elbow",
+  "elate","elect","elope","elide","ember","enemy","enema","entry","envoy","erase",
+  "erect","erect","ethic","ethos","evict","event","exact","exist","exalt","exert",
+  "fable","facet","fairy","faith","faint","falco","false","fancy","farce","fatal",
+  "favor","fecal","feast","femur","feral","fetch","fetus","fiend","fibre","field",
+  "final","finch","finer","first","fishy","flesh","flair","flame","flask","fleck",
+  "fleet","flock","flora","flour","fluke","flung","flush","flute","foist","folio",
+  "folio","force","foyer","folio","forte","forth","forty","frock","froth","frown",
+  "fruit","fudge","fugue","fully","fungi","funny","furor","fussy","fussy","fuzzy",
+  "gaudy","gavel","gayer","gauge","gayer","gaunt","gavel","gauge","ghoul","giant",
+  "given","girth","glade","glare","glaze","gleam","glean","glide","gloss","glyph",
+  "gloat","gloom","glory","glove","gourd","grace","grade","grain","grand","grant",
+  "grasp","grate","grave","gravy","great","greed","green","greet","grief","grime",
+  "grimy","grind","groan","groin","grove","gross","group","gruel","grunt","guile",
+  "gusto","habit","hatch","hater","haute","haunt","haven","hazel","heath","heard",
+  "hefty","hello","hence","homer","honor","horde","horny","house","howdy","hover",
+  "human","humid","humor","humph","hunch","hunky","hymen","icily","idiot","idyll",
+  "image","imply","inane","incur","index","inert","infer","inner","input","insol",
+  "ionic","issue","ivory","junta","jumbo","jumpy","joust","joist","knead","kneel",
+  "knelt","knack","knoll","known","known","koala","label","lacer","lapse","lanky",
+  "large","latch","later","latch","lathe","latch","latch","layer","leach","least",
+  "leant","leary","leave","leper","leach","leery","legal","lemon","leper","lesser",
+  "level","licit","light","lilac","liver","lodge","loamy","loath","locus","lofty",
+  "logic","loose","lorry","louse","lousy","lower","loyal","lumen","lunch","lunge",
+  "lupus","lusty","lying","macaw","macro","madly","mange","mango","march","marsh",
+  "marry","match","matey","mealy","meant","medal","medic","mecca","melon","merry",
+  "meson","metro","might","miner","mince","minor","minus","modal","model","money",
+  "month","moist","mocha","molar","mound","moult","mount","movie","mural","musky",
+  "music","muted","myrrh","naive","nadir","named","naval","navel","needy","nerdy",
+  "nerve","never","newer","newly","nicer","night","ninth","noble","nomad","nonce",
+  "noose","north","notch","novel","nurse","oaken","obese","ocean","octal","octet",
+  "offal","often","olden","olive","ombre","omega","onset","opium","opine","opera",
+  "order","organ","ought","outer","ounce","oval","ovary","ovate","oxide","owing",
+  "owner","oxide","paced","paddy","pagan","paint","palet","palsy","panel","pansy",
+  "panic","pasta","pasty","patch","payer","pecan","pedal","peach","pearl","pecan",
+  "penal","pence","perch","peril","pesky","phase","phone","piano","piece","pilot",
+  "pinch","pinky","pinto","piper","pivot","place","plaid","plane","plank","plaza",
+  "plead","pleat","plumb","plume","plush","point","poise","polka","poppy","porch",
+  "posey","poser","posit","pouch","pound","power","pride","pried","prime","print",
+  "prior","prism","prone","prong","prove","proxy","psalm","pupal","puree","purer",
+  "purge","pushy","quart","queen","query","quasi","quill","quilt","quoth","rabid",
+  "racer","rally","ranch","range","raper","raspy","ratty","reach","ready","rearm",
+  "rebus","recur","reedy","refer","refit","reign","relax","relic","remit","renew",
+  "repay","revel","rerun","reuse","right","rider","rifle","rival","river","rivet",
+  "roast","rodeo","rogue","rough","round","route","robin","roost","rotor","rouge",
+  "rouse","ruler","rumba","rural","rusty","sable","sally","salad","salon","salve",
+  "salty","satin","safer","saint","sappy","scent","scene","scoop","scope","score",
+  "scrap","scrub","scout","scrum","scamp","scale","scalp","scaly","scarce","scarf",
+  "scene","screw","seize","sense","sepia","serif","serum","seven","sever","shade",
+  "shady","shaft","shake","shale","shall","shame","shark","sharp","shard","shear",
+  "sheep","sheer","sheet","shelf","shelf","shelf","sherd","shift","shine","shiny",
+  "shirt","shock","shoot","shore","short","shove","shown","shrub","shuck","shunt",
+  "sieve","siege","silly","since","sinew","sinus","skate","skimp","skull","skirt",
+  "slack","slain","slam","slang","slant","slate","slime","slimy","sling","sloop",
+  "sloth","slump","slush","smack","small","smart","smear","smell","smile","smirk",
+  "smock","smoke","smote","snail","snake","snap","snare","snide","sniff","snore",
+  "snout","snuck","snowy","snuff","soapy","sober","socle","solar","solid","solve",
+  "sonar","sonic","sooth","sorry","sound","south","space","spade","spank","spasm",
+  "spate","speak","speck","spend","spent","sperm","spice","spied","spiel","spike",
+  "spill","spine","spite","split","spoil","spook","spool","spore","sport","spray",
+  "spree","sprig","spurn","spurt","squat","stack","staff","stage","stain","stair",
+  "stake","stale","stalk","stamp","stand","stare","start","stash","state","steak",
+  "steam","steel","steep","steer","stein","stent","stern","stew","stick","stiff",
+  "stilt","sting","stink","stint","stock","stoke","stole","stomp","stone","stool",
+  "stoop","store","stork","storm","story","stove","strap","straw","stray","strut",
+  "study","stuff","stunk","stunt","style","suave","sugar","suite","sunny","super",
+  "surge","surly","swami","swear","swill","swine","swirl","swish","swoop","swoon",
+  "sworn","swung","sybil","synod","table","tacit","tacky","taffy","taint","taken",
+  "taper","tapir","tardy","taste","tasty","tenth","teeth","tepid","teary","tenor",
+  "tense","tenet","tenth","terse","terra","theta","there","thief","threw","throb",
+  "thrum","thunk","thump","thong","thick","tidal","tiger","tithe","towel","today",
+  "toxic","toxin","tonal","tonic","topic","toxic","tract","trade","trail","train",
+  "trait","tramp","trash","trick","tried","tripe","truly","truss","trust","truth",
+  "trunk","tryst","tubal","tuber","tulip","tunic","tweak","tweed","twice","twist",
+  "tying","ulcer","ultra","unfed","unfit","unify","unmet","unzip","upset","upper",
+  "usage","usurp","utile","valet","valid","value","vapor","vault","vaunt","venue",
+  "verse","vests","vigor","viral","virus","vista","vital","vocal","vogue","vomit",
+  "voter","vying","wagon","wafer","wager","waken","waltz","waned","wanted","waste",
+  "watch","water","weary","weigh","welds","welch","whelp","whale","wharf","whine",
+  "whiny","whole","whose","width","widen","wight","wimpy","windy","wiped","wired",
+  "wispy","wiser","witch","woman","women","wonky","wound","woven","wrack","wraps",
+  "wrath","wreak","wreck","wring","wrung","wrote","xerox","xylem","yacht","yearn",
+  "yeast","yerba","youth","zebra","zonal","zesty"
+];
+
+
+  let targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+  console.log("Target word:", targetWord); 
+
+  const board = document.getElementById("board");
+  const keyboardEl = document.getElementById("keyboard");
+  const message = document.getElementById("message");
+
+  // create board
+  for (let i = 0; i < maxRows; i++) {
+    const row = document.createElement("div");
+    row.className = "row";
+    for (let j = 0; j < maxCols; j++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      row.appendChild(cell);
+    }
+    board.appendChild(row);
+  }
+
+  // create keyboard
+  const keys = "QWERTYUIOPASDFGHJKLZXCVBNM".split("");
+  keys.forEach(k => {
+    const keyBtn = document.createElement("div");
+    keyBtn.textContent = k;
+    keyBtn.className = "key";
+    keyBtn.addEventListener("click", () => handleKey(k));
+    keyboardEl.appendChild(keyBtn);
+  });
+
+  const enterKey = document.createElement("div");
+  enterKey.textContent = "ENTER";
+  enterKey.className = "key wide";
+  enterKey.addEventListener("click", () => handleKey("ENTER"));
+  keyboardEl.appendChild(enterKey);
+
+  const backKey = document.createElement("div");
+  backKey.textContent = "⌫";
+  backKey.className = "key wide";
+  backKey.addEventListener("click", () => handleKey("BACK"));
+  keyboardEl.appendChild(backKey);
+
+  // handle physical keyboard
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleKey("ENTER");
+    else if (e.key === "Backspace") handleKey("BACK");
+    else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+  });
+
+  function handleKey(key) {
+    if (currentRow >= maxRows) return;
+    const row = board.children[currentRow];
+    if (key === "BACK") {
+      if (currentCol > 0) {
+        currentCol--;
+        row.children[currentCol].textContent = "";
+      }
+    } else if (key === "ENTER") {
+      if (currentCol === maxCols) submitGuess();
+    } else if (currentCol < maxCols) {
+      row.children[currentCol].textContent = key;
+      currentCol++;
+    }
+  }
+
+  async function submitGuess() {
+  const row = board.children[currentRow];
+  let guess = "";
+  for (let i = 0; i < maxCols; i++) guess += row.children[i].textContent;
+  guess = guess.toLowerCase(); 
+
+  if (!WORDS.includes(guess)) {
+    message.textContent = "Not in word list!";
+    return;
+  }
+
+  message.textContent = "";
+
+  // Flip animation + coloring
+  for (let i = 0; i < maxCols; i++) {
+    const cell = row.children[i];
+    cell.classList.add("flip");
+    cell.addEventListener("animationend", () => {
+      cell.classList.remove("flip");
+    }, { once: true });
+
+    const letter = cell.textContent.toLowerCase();
+    const keyBtn = [...keyboardEl.children].find(k => k.textContent.toUpperCase() === letter.toUpperCase());
+
+    if (letter === targetWord[i]) {
+      cell.classList.add("correct");
+      keyBtn?.classList.add("correct");
+    } else if (targetWord.includes(letter)) {
+      cell.classList.add("present");
+      if (!keyBtn?.classList.contains("correct")) keyBtn?.classList.add("present");
+    } else {
+      cell.classList.add("absent");
+      if (!keyBtn?.classList.contains("correct") && !keyBtn?.classList.contains("present")) keyBtn?.classList.add("absent");
+    }
+  }
+
+  if (guess === targetWord) {
+  showEndPopup(true);
+  return;
+}
+
+  currentRow++;
+currentCol = 0;
+
+if (currentRow === maxRows) {
+  showEndPopup(false);
+}
+}
+
+const creditsBtn = document.getElementById("credits-btn");
+const creditsOverlay = document.getElementById("credits-overlay");
+const creditsPopup = document.getElementById("credits-popup");
+
+creditsBtn.addEventListener("click", () => {
+  creditsOverlay.style.display = "flex";
+});
+
+creditsOverlay.addEventListener("click", () => {
+  creditsOverlay.style.display = "none";
+});
+
+creditsPopup.addEventListener("click", e => {
+  e.stopPropagation();
+});
+
+
+
+</script>
+</body>
+</html>

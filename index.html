@@ -1,97 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wordle Pro</title>
-<link rel="icon" href="data:image/svg+xml,
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-  <rect x='0'   y='0'   width='33' height='33' fill='%23ffffff'/>
-  <rect x='33'  y='0'   width='33' height='33' fill='%23ffffff'/>
-  <rect x='66'  y='0'   width='34' height='33' fill='%23ffffff'/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <rect x='0'   y='33'  width='33' height='33' fill='%23ffffff'/>
-  <rect x='33'  y='33'  width='33' height='33' fill='%23c9b458'/>
-  <rect x='66'  y='33'  width='34' height='33' fill='%236aaa64'/>
+  <title>Wednesday Wordle | SHRIMP LAB</title>
 
-  <rect x='0'   y='66'  width='33' height='34' fill='%236aaa64'/>
-  <rect x='33'  y='66'  width='33' height='34' fill='%236aaa64'/>
-  <rect x='66'  y='66'  width='34' height='34' fill='%236aaa64'/>
-</svg>">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-<style>
-  body {
-    background: #121213;
-    color: #eee;
-    font-family: sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-  }
-  h1 {
-    margin-bottom: 1rem;
-  }
-  .board {
-    display: grid;
-    grid-template-rows: repeat(6, 60px);
-    gap: 5px;
-  }
-  .row {
-    display: grid;
-    grid-template-columns: repeat(5, 60px);
-    gap: 5px;
-  }
-  .cell {
-    width: 60px;
-    height: 60px;
-    background: #3a3a3c;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.8rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    border-radius: 5px;
-    perspective: 1000px;
-  }
-  .cell.flip {
-    animation: flip 0.5s forwards;
-  }
-  @keyframes flip {
-    0% { transform: rotateX(0deg); }
-    50% { transform: rotateX(90deg); background: #3a3a3c; }
-    100% { transform: rotateX(0deg); }
-  }
-  .cell.correct { background: #538d4e; }
-  .cell.present { background: #b59f3b; }
-  .cell.absent { background: #3a3a3c; opacity: 0.7; }
-  .keyboard {
-    margin-top: 1rem;
-    display: grid;
-    grid-template-columns: repeat(10, 40px);
-    gap: 5px;
-    justify-content: center;
-  }
-  .key {
-    padding: 0.5rem;
-    background: #818384;
-    border-radius: 4px;
-    text-align: center;
-    cursor: pointer;
-    user-select: none;
-    font-weight: bold;
-  }
-  .key.wide { grid-column: span 2; }
-  .key.correct { background: #538d4e; }
-  .key.present { background: #b59f3b; }
-  .key.absent { background: #3a3a3c; opacity: 0.7; }
-  #message {
-    margin-top: 1rem;
-    height: 1.5rem;
-  }
-  
-  /* Credits button */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, #181818 0%, #080808 45%, #000 100%);
+      color: white;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .back {
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      color: #aaa;
+      text-decoration: none;
+      font-size: 14px;
+      transition: 0.2s;
+      z-index: 10;
+    }
+
+    .back:hover {
+      color: white;
+      transform: translateX(-3px);
+    }
+
+    header {
+      text-align: center;
+      margin-top: 25px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 6vw, 42px);
+      letter-spacing: 3px;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      margin: 7px 0 0;
+      color: #777;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    #loading {
+      margin-top: 25px;
+      color: #888;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    #game {
+      display: none;
+      width: 100%;
+      max-width: 500px;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* =======================
+       BOARD
+    ======================= */
+
+    #board {
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+      gap: 6px;
+      width: min(350px, 90vw);
+      aspect-ratio: 5 / 6;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+
+    .tile {
+      border: 2px solid #333;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(22px, 7vw, 32px);
+      font-weight: 800;
+      text-transform: uppercase;
+      transition:
+        transform 0.15s,
+        background 0.15s,
+        border-color 0.15s;
+    }
+
+    .tile.filled {
+      border-color: #555;
+    }
+
+    .tile.correct {
+      background: #538d4e;
+      border-color: #538d4e;
+    }
+
+    .tile.present {
+      background: #b59f3b;
+      border-color: #b59f3b;
+    }
+
+    .tile.absent {
+      background: #3a3a3c;
+      border-color: #3a3a3c;
+    }
+
+    .tile.pop {
+      animation: pop 0.1s ease-out;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.08);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .tile.flip {
+      animation: flip 0.55s ease;
+    }
+
+    @keyframes flip {
+      0% {
+        transform: rotateX(0);
+      }
+
+      50% {
+        transform: rotateX(90deg);
+      }
+
+      100% {
+        transform: rotateX(0);
+      }
+    }
+
+    /* =======================
+       MESSAGE
+    ======================= */
+
+    #message {
+      min-height: 25px;
+      margin: 14px 0 8px;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    /* =======================
+       KEYBOARD
+    ======================= */
+
+    #keyboard {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .keyboard-row {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .key {
+      border: none;
+      border-radius: 4px;
+      background: #818384;
+      color: white;
+      min-width: 28px;
+      height: 54px;
+      padding: 0 7px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      user-select: none;
+      transition:
+        transform 0.08s,
+        background 0.15s;
+    }
+
+    .key:hover {
+      filter: brightness(1.1);
+    }
+
+    .key:active {
+      transform: scale(0.92);
+    }
+
+    .key.wide {
+      min-width: 52px;
+      font-size: 11px;
+    }
+
+    .key.correct {
+      background: #538d4e;
+    }
+
+    .key.present {
+      background: #b59f3b;
+    }
+
+    .key.absent {
+      background: #3a3a3c;
+    }
+
+    /* =======================
+       COUNTDOWN
+    ======================= */
+
+    #countdown {
+      margin-top: 18px;
+      color: #777;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    /* =======================
+       RESULT MODAL
+    ======================= */
+
+    #result {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .result-box {
+      width: min(380px, 92vw);
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 14px;
+      padding: 28px 22px;
+      text-align: center;
+      box-shadow:
+        0 0 30px rgba(0, 255, 221, 0.08);
+    }
+
+    .result-box h2 {
+      margin: 0 0 10px;
+      font-size: 25px;
+    }
+
+    .result-word {
+      font-size: 27px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      margin: 15px 0;
+    }
+
+    .result-stats {
+      color: #999;
+      font-size: 13px;
+    }
+
+    .close-button {
+      margin-top: 20px;
+      padding: 10px 18px;
+      border: 1px solid #333;
+      border-radius: 7px;
+      background: #1b1b1b;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .close-button:hover {
+      background: #252525;
+    }
+
+    @media (max-width: 430px) {
+
+      body {
+        padding: 14px;
+      }
+
+      .back {
+        top: 12px;
+        left: 13px;
+      }
+
+      header {
+        margin-top: 35px;
+      }
+
+      .key {
+        height: 48px;
+        min-width: 25px;
+        padding: 0 5px;
+      }
+
+      .key.wide {
+        min-width: 45px;
+      }
+    }
+
+      /* Credits button */
 #credits-btn {
   position: fixed;
   bottom: 10px;
@@ -140,49 +382,1235 @@
   text-decoration: underline;
 }
 
-/* End game overlay */
-#end-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-}
 
-#end-popup {
-  background: #111;
-  border: 1px solid #333;
-  padding: 24px 32px;
-  border-radius: 10px;
-  text-align: center;
-}
-
-#end-popup button {
-  margin-top: 15px;
-  padding: 8px 18px;
-  font-size: 16px;
-  cursor: pointer;
-  background: #6aaa64;
-  border: none;
-  border-radius: 6px;
-  color: #fff;
-}
-
-#end-popup button:hover {
-  filter: brightness(1.1);
-}
-
-</style>
+  </style>
 </head>
-<body>
-<h1>Wordle Pro</h1>
-<div class="board" id="board"></div>
-<p id="message"></p>
-<div class="keyboard" id="keyboard"></div>
 
-<!-- Credits button -->
+<body>
+
+  <a href="../../index.html" class="back">← LAB</a>
+
+  <header>
+    <h1>WEDNESDAY WORDLE</h1>
+    <p class="subtitle">SHRIMP LAB • WEEKLY SPECIAL</p>
+  </header>
+
+  <div id="loading">
+    Loading word list...
+  </div>
+
+  <main id="game">
+
+    <div id="board"></div>
+
+    <div id="message"></div>
+
+    <div id="keyboard">
+
+      <div class="keyboard-row">
+        <button class="key" data-key="Q">Q</button>
+        <button class="key" data-key="W">W</button>
+        <button class="key" data-key="E">E</button>
+        <button class="key" data-key="R">R</button>
+        <button class="key" data-key="T">T</button>
+        <button class="key" data-key="Y">Y</button>
+        <button class="key" data-key="U">U</button>
+        <button class="key" data-key="I">I</button>
+        <button class="key" data-key="O">O</button>
+        <button class="key" data-key="P">P</button>
+      </div>
+
+      <div class="keyboard-row">
+        <button class="key" data-key="A">A</button>
+        <button class="key" data-key="S">S</button>
+        <button class="key" data-key="D">D</button>
+        <button class="key" data-key="F">F</button>
+        <button class="key" data-key="G">G</button>
+        <button class="key" data-key="H">H</button>
+        <button class="key" data-key="J">J</button>
+        <button class="key" data-key="K">K</button>
+        <button class="key" data-key="L">L</button>
+      </div>
+
+      <div class="keyboard-row">
+        <button class="key wide" data-key="ENTER">ENTER</button>
+
+        <button class="key" data-key="Z">Z</button>
+        <button class="key" data-key="X">X</button>
+        <button class="key" data-key="C">C</button>
+        <button class="key" data-key="V">V</button>
+        <button class="key" data-key="B">B</button>
+        <button class="key" data-key="N">N</button>
+        <button class="key" data-key="M">M</button>
+
+        <button class="key wide" data-key="BACKSPACE">⌫</button>
+      </div>
+
+    </div>
+
+    <div id="countdown"></div>
+
+  </main>
+
+
+  <!-- RESULT -->
+  <div id="result">
+
+    <div class="result-box">
+
+      <h2 id="result-title">
+        You got it!
+      </h2>
+
+      <div class="result-word" id="result-word">
+        WORD
+      </div>
+
+      <div class="result-stats" id="result-stats">
+        Solved in 4 guesses
+      </div>
+
+      <button class="close-button" id="close-result">
+        CLOSE
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    // ============================================================
+    // WORD LIST SOURCES
+    // ============================================================
+
+    const WORD_URLS = [
+      "https://darkermango.github.io/5-Letter-words/words.json",
+      "https://cdn.jsdelivr.net/gh/darkermango/5-Letter-words@main/words.json",
+      "https://raw.githubusercontent.com/darkermango/5-Letter-words/main/words.json"
+    ];
+
+
+    // ============================================================
+    // GAME VARIABLES
+    // ============================================================
+
+    let WORDS = [];
+    let answer = "";
+    let guesses = [];
+    let currentGuess = "";
+    let currentRow = 0;
+    let gameOver = false;
+    let keyboardState = {};
+    let gameReady = false;
+
+
+    // ============================================================
+    // ELEMENTS
+    // ============================================================
+
+    const loading =
+      document.getElementById("loading");
+
+    const game =
+      document.getElementById("game");
+
+    const board =
+      document.getElementById("board");
+
+    const message =
+      document.getElementById("message");
+
+    const countdown =
+      document.getElementById("countdown");
+
+    const result =
+      document.getElementById("result");
+
+    const resultTitle =
+      document.getElementById("result-title");
+
+    const resultWord =
+      document.getElementById("result-word");
+
+    const resultStats =
+      document.getElementById("result-stats");
+
+    const closeResult =
+      document.getElementById("close-result");
+
+
+    // ============================================================
+    // GET WEDNESDAY DATE
+    // ============================================================
+
+    function getWednesdayDate() {
+
+      const now = new Date();
+
+      const day = now.getDay();
+
+      const difference = 3 - day;
+
+      const wednesday = new Date(now);
+
+      wednesday.setDate(
+        now.getDate() + difference
+      );
+
+      wednesday.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      return wednesday;
+    }
+
+
+    // ============================================================
+    // DATE SEED
+    // ============================================================
+
+    function getDateSeed(date) {
+
+      const year =
+        date.getFullYear();
+
+      const month =
+        date.getMonth() + 1;
+
+      const day =
+        date.getDate();
+
+      return (
+        year * 10000 +
+        month * 100 +
+        day
+      );
+    }
+
+
+    // ============================================================
+    // GET WEEK'S WORD
+    // ============================================================
+
+    function getWednesdayWord() {
+
+      const wednesday =
+        getWednesdayDate();
+
+      const seed =
+        getDateSeed(wednesday);
+
+      const index =
+        seed % WORDS.length;
+
+      return WORDS[index];
+    }
+
+
+    // ============================================================
+    // STORAGE KEY
+    // ============================================================
+
+    function getStorageKey() {
+
+      const date =
+        getWednesdayDate();
+
+      const seed =
+        getDateSeed(date);
+
+      return `wednesdayWordle-${seed}`;
+    }
+
+
+    // ============================================================
+    // LOAD SAVED GAME
+    // ============================================================
+
+    function loadGame() {
+
+      try {
+
+        const saved =
+          localStorage.getItem(
+            getStorageKey()
+          );
+
+        if (!saved) {
+          return;
+        }
+
+        const data =
+          JSON.parse(saved);
+
+        guesses =
+          Array.isArray(data.guesses)
+            ? data.guesses
+            : [];
+
+        currentGuess =
+          typeof data.currentGuess === "string"
+            ? data.currentGuess
+            : "";
+
+        currentRow =
+          Number.isInteger(data.currentRow)
+            ? data.currentRow
+            : guesses.length;
+
+        gameOver =
+          Boolean(data.gameOver);
+
+        keyboardState =
+          data.keyboardState || {};
+
+      } catch (error) {
+
+        console.warn(
+          "Could not restore saved game:",
+          error
+        );
+      }
+    }
+
+
+    // ============================================================
+    // SAVE GAME
+    // ============================================================
+
+    function saveGame() {
+
+      try {
+
+        localStorage.setItem(
+          getStorageKey(),
+          JSON.stringify({
+            guesses,
+            currentGuess,
+            currentRow,
+            gameOver,
+            keyboardState
+          })
+        );
+
+      } catch (error) {
+
+        console.warn(
+          "Could not save game:",
+          error
+        );
+      }
+    }
+
+
+    // ============================================================
+    // CREATE BOARD
+    // ============================================================
+
+    function createBoard() {
+
+      board.innerHTML = "";
+
+      for (
+        let row = 0;
+        row < 6;
+        row++
+      ) {
+
+        const rowElement =
+          document.createElement("div");
+
+        rowElement.className =
+          "row";
+
+        for (
+          let col = 0;
+          col < 5;
+          col++
+        ) {
+
+          const tile =
+            document.createElement("div");
+
+          tile.className =
+            "tile";
+
+          tile.dataset.row =
+            row;
+
+          tile.dataset.col =
+            col;
+
+          rowElement.appendChild(tile);
+        }
+
+        board.appendChild(
+          rowElement
+        );
+      }
+    }
+
+
+    // ============================================================
+    // UPDATE BOARD
+    // ============================================================
+
+    function updateBoard() {
+
+      const tiles =
+        document.querySelectorAll(
+          ".tile"
+        );
+
+      tiles.forEach(tile => {
+
+        const row =
+          Number(tile.dataset.row);
+
+        const col =
+          Number(tile.dataset.col);
+
+        tile.className =
+          "tile";
+
+        let letter = "";
+
+        if (
+          row < guesses.length
+        ) {
+
+          letter =
+            guesses[row][col] || "";
+
+        } else if (
+          row === currentRow
+        ) {
+
+          letter =
+            currentGuess[col] || "";
+        }
+
+        tile.textContent =
+          letter;
+
+        if (letter) {
+          tile.classList.add(
+            "filled"
+          );
+        }
+      });
+
+
+      // Restore completed guesses
+      guesses.forEach(
+        (guess, row) => {
+
+          const states =
+            getGuessResult(guess);
+
+          states.forEach(
+            (state, col) => {
+
+              const tile =
+                document.querySelector(
+                  `.tile[data-row="${row}"][data-col="${col}"]`
+                );
+
+              if (tile) {
+
+                tile.classList.add(
+                  state
+                );
+              }
+            }
+          );
+        }
+      );
+
+
+      updateKeyboard();
+    }
+
+
+    // ============================================================
+    // CHECK GUESS
+    // ============================================================
+
+    function getGuessResult(guess) {
+
+      const states =
+        Array(5).fill("absent");
+
+      const answerLetters =
+        answer.split("");
+
+      const guessLetters =
+        guess.split("");
+
+
+      // Correct letters
+      for (
+        let i = 0;
+        i < 5;
+        i++
+      ) {
+
+        if (
+          guessLetters[i] ===
+          answerLetters[i]
+        ) {
+
+          states[i] =
+            "correct";
+
+          answerLetters[i] =
+            null;
+
+          guessLetters[i] =
+            null;
+        }
+      }
+
+
+      // Present letters
+      for (
+        let i = 0;
+        i < 5;
+        i++
+      ) {
+
+        if (
+          !guessLetters[i]
+        ) {
+          continue;
+        }
+
+        const index =
+          answerLetters.indexOf(
+            guessLetters[i]
+          );
+
+        if (index !== -1) {
+
+          states[i] =
+            "present";
+
+          answerLetters[index] =
+            null;
+        }
+      }
+
+      return states;
+    }
+
+
+    // ============================================================
+    // ADD LETTER
+    // ============================================================
+
+    function addLetter(letter) {
+
+      if (
+        !gameReady ||
+        gameOver ||
+        currentGuess.length >= 5
+      ) {
+        return;
+      }
+
+      currentGuess +=
+        letter.toUpperCase();
+
+      updateBoard();
+
+      saveGame();
+    }
+
+
+    // ============================================================
+    // DELETE LETTER
+    // ============================================================
+
+    function deleteLetter() {
+
+      if (
+        !gameReady ||
+        gameOver ||
+        currentGuess.length === 0
+      ) {
+        return;
+      }
+
+      currentGuess =
+        currentGuess.slice(
+          0,
+          -1
+        );
+
+      updateBoard();
+
+      saveGame();
+    }
+
+
+    // ============================================================
+    // SUBMIT GUESS
+    // ============================================================
+
+    function submitGuess() {
+
+      if (
+        !gameReady ||
+        gameOver
+      ) {
+        return;
+      }
+
+      if (
+        currentGuess.length !== 5
+      ) {
+
+        showMessage(
+          "Not enough letters."
+        );
+
+        return;
+      }
+
+
+      if (
+        !WORDS.includes(
+          currentGuess
+        )
+      ) {
+
+        showMessage(
+          "Not in word list."
+        );
+
+        return;
+      }
+
+
+      const submitted =
+        currentGuess;
+
+      guesses.push(
+        submitted
+      );
+
+      currentGuess = "";
+
+
+      // Update keyboard
+      const states =
+        getGuessResult(
+          submitted
+        );
+
+      for (
+        let i = 0;
+        i < 5;
+        i++
+      ) {
+
+        updateKeyboardState(
+          submitted[i],
+          states[i]
+        );
+      }
+
+
+      updateBoard();
+
+
+      // Animation
+      animateRow(
+        currentRow
+      );
+
+
+      // WIN
+      if (
+        submitted === answer
+      ) {
+
+        const attempts =
+          currentRow + 1;
+
+        currentRow++;
+
+        gameOver = true;
+
+        saveGame();
+
+        setTimeout(() => {
+
+          showResult(
+            true,
+            attempts
+          );
+
+        }, 1300);
+
+        return;
+      }
+
+
+      currentRow++;
+
+
+      // LOSS
+      if (
+        currentRow >= 6
+      ) {
+
+        gameOver = true;
+
+        saveGame();
+
+        setTimeout(() => {
+
+          showResult(
+            false,
+            6
+          );
+
+        }, 1300);
+
+        return;
+      }
+
+
+      saveGame();
+    }
+
+
+    // ============================================================
+    // ROW ANIMATION
+    // ============================================================
+
+    function animateRow(row) {
+
+      const tiles =
+        document.querySelectorAll(
+          `.tile[data-row="${row}"]`
+        );
+
+      tiles.forEach(
+        (tile, index) => {
+
+          setTimeout(() => {
+
+            tile.classList.add(
+              "flip"
+            );
+
+          }, index * 100);
+        }
+      );
+    }
+
+
+    // ============================================================
+    // KEYBOARD STATE
+    // ============================================================
+
+    function updateKeyboardState(
+      letter,
+      state
+    ) {
+
+      const priority = {
+        absent: 1,
+        present: 2,
+        correct: 3
+      };
+
+      const oldState =
+        keyboardState[letter];
+
+      if (
+        !oldState ||
+        priority[state] >
+        priority[oldState]
+      ) {
+
+        keyboardState[letter] =
+          state;
+      }
+    }
+
+
+    // ============================================================
+    // UPDATE KEYBOARD
+    // ============================================================
+
+    function updateKeyboard() {
+
+      document
+        .querySelectorAll(".key")
+        .forEach(key => {
+
+          const letter =
+            key.dataset.key;
+
+          key.classList.remove(
+            "correct",
+            "present",
+            "absent"
+          );
+
+          if (
+            keyboardState[letter]
+          ) {
+
+            key.classList.add(
+              keyboardState[letter]
+            );
+          }
+        });
+    }
+
+
+    // ============================================================
+    // MESSAGE
+    // ============================================================
+
+    let messageTimer;
+
+    function showMessage(text) {
+
+      clearTimeout(
+        messageTimer
+      );
+
+      message.textContent =
+        text;
+
+      messageTimer =
+        setTimeout(() => {
+
+          if (!gameOver) {
+
+            message.textContent =
+              "";
+          }
+
+        }, 1800);
+    }
+
+
+    // ============================================================
+    // RESULT
+    // ============================================================
+
+    function showResult(
+      won,
+      attempts
+    ) {
+
+      resultTitle.textContent =
+        won
+          ? "You got it!"
+          : "Better luck next Wednesday!";
+
+      resultWord.textContent =
+        answer;
+
+      if (won) {
+
+        resultStats.textContent =
+          `Solved in ${attempts} ${
+            attempts === 1
+              ? "guess"
+              : "guesses"
+          }.`;
+
+      } else {
+
+        resultStats.textContent =
+          "The word was revealed.";
+      }
+
+      result.style.display =
+        "flex";
+    }
+
+
+    // ============================================================
+    // CLOSE RESULT
+    // ============================================================
+
+    closeResult.addEventListener(
+      "click",
+      () => {
+
+        result.style.display =
+          "none";
+      }
+    );
+
+
+    // ============================================================
+    // PHYSICAL KEYBOARD
+    // ============================================================
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        if (!gameReady) {
+          return;
+        }
+
+        const key =
+          event.key.toUpperCase();
+
+        if (
+          key.length === 1 &&
+          /^[A-Z]$/.test(key)
+        ) {
+
+          addLetter(key);
+
+          return;
+        }
+
+        if (
+          event.key ===
+          "Backspace"
+        ) {
+
+          deleteLetter();
+
+          return;
+        }
+
+        if (
+          event.key ===
+          "Enter"
+        ) {
+
+          submitGuess();
+        }
+      }
+    );
+
+
+    // ============================================================
+    // ON-SCREEN KEYBOARD
+    // ============================================================
+
+    document
+      .querySelectorAll(".key")
+      .forEach(key => {
+
+        key.addEventListener(
+          "click",
+          () => {
+
+            const value =
+              key.dataset.key;
+
+            if (
+              value === "ENTER"
+            ) {
+
+              submitGuess();
+
+            } else if (
+              value === "BACKSPACE"
+            ) {
+
+              deleteLetter();
+
+            } else {
+
+              addLetter(value);
+            }
+          }
+        );
+      });
+
+
+    // ============================================================
+    // COUNTDOWN
+    // ============================================================
+
+    function updateCountdown() {
+
+      const now =
+        new Date();
+
+      let next =
+        new Date(
+          getWednesdayDate()
+        );
+
+      if (
+        now >= next
+      ) {
+
+        next.setDate(
+          next.getDate() + 7
+        );
+      }
+
+      const difference =
+        next - now;
+
+      const days =
+        Math.floor(
+          difference /
+          (1000 * 60 * 60 * 24)
+        );
+
+      const hours =
+        Math.floor(
+          (difference %
+            (1000 * 60 * 60 * 24)) /
+          (1000 * 60 * 60)
+        );
+
+      const minutes =
+        Math.floor(
+          (difference %
+            (1000 * 60 * 60)) /
+          (1000 * 60)
+        );
+
+      const seconds =
+        Math.floor(
+          (difference %
+            (1000 * 60)) /
+          1000
+        );
+
+      countdown.textContent =
+        `Next Wednesday Wordle in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+
+    // ============================================================
+    // LOAD WORD LIST
+    // ============================================================
+
+    async function loadWords() {
+
+      let lastError = null;
+
+      for (
+        const url of WORD_URLS
+      ) {
+
+        try {
+
+          console.log(
+            "Trying word list:",
+            url
+          );
+
+
+          const response =
+            await fetch(url, {
+              method: "GET",
+              cache: "no-store"
+            });
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              `HTTP ${response.status}`
+            );
+          }
+
+
+          const data =
+            await response.json();
+
+
+          // ==========================================
+          // IMPORTANT:
+          // DarkerMango's JSON is:
+          //
+          // {
+          //   "words": [...]
+          // }
+          //
+          // So we need data.words.
+          // ==========================================
+
+          let rawWords;
+
+          if (
+            Array.isArray(data)
+          ) {
+
+            rawWords =
+              data;
+
+          } else if (
+            data &&
+            Array.isArray(data.words)
+          ) {
+
+            rawWords =
+              data.words;
+
+          } else {
+
+            throw new Error(
+              "Unexpected word-list format"
+            );
+          }
+
+
+          // Clean words
+          const cleaned =
+            rawWords
+              .map(word =>
+                String(word)
+                  .trim()
+                  .toUpperCase()
+              )
+              .filter(word =>
+                /^[A-Z]{5}$/.test(word)
+              );
+
+
+          if (
+            cleaned.length < 100
+          ) {
+
+            throw new Error(
+              "Word list contains too few valid words"
+            );
+          }
+
+
+          // Remove duplicates
+          WORDS =
+            [...new Set(cleaned)];
+
+
+          console.log(
+            `Loaded ${WORDS.length} five-letter words.`
+          );
+
+
+          return;
+
+        } catch (error) {
+
+          console.warn(
+            `Failed to load ${url}:`,
+            error
+          );
+
+          lastError =
+            error;
+        }
+      }
+
+
+      throw lastError ||
+        new Error(
+          "All word-list sources failed."
+        );
+    }
+
+
+    // ============================================================
+    // START GAME
+    // ============================================================
+
+    async function startGame() {
+
+      try {
+
+        await loadWords();
+
+
+        // Pick this week's word
+        answer =
+          getWednesdayWord();
+
+
+        console.log(
+          "Wednesday Wordle initialized."
+        );
+
+
+        // Restore progress
+        loadGame();
+
+
+        // Create board
+        createBoard();
+
+
+        // Restore board
+        updateBoard();
+
+
+        // Show game
+        loading.style.display =
+          "none";
+
+        game.style.display =
+          "flex";
+
+        gameReady = true;
+
+
+        // Countdown
+        updateCountdown();
+
+        setInterval(
+          updateCountdown,
+          1000
+        );
+
+
+        if (gameOver) {
+
+          message.textContent =
+            "You've already played this Wednesday.";
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          "WORDLE WORD LIST ERROR:",
+          error
+        );
+
+        loading.textContent =
+          "Could not load word list.";
+
+        loading.style.color =
+          "#777";
+      }
+    }
+
+
+    // ============================================================
+    // START
+    // ============================================================
+
+    startGame();
+
+  </script>
+
+  <!-- Credits button -->
 <div id="credits-btn">Credits</div>
 
 <!-- Credits popup overlay -->
@@ -191,311 +1619,11 @@
     <h2>CREDITS</h2>
     <p>
       <a href="https://github.com/LEBRONGOAT2323" target="_blank">LEBRONGOAT2323 - Creater</a><br>
-      <a href="https://github.com/prashilshah98/wordle-list" target="_blank">prashilshah98 - Word List</a><br>
+      <a href="https://github.com/darkermango/5-Letter-words" target="_blank">darkermango - Word List</a><br>
       <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank">Wordle - Orignal Wordle Game</a>
     </p>
   </div>
 </div>
-
-<!-- End Game Overlay -->
-<div id="end-overlay">
-  <div id="end-popup">
-    <h2 id="end-title"></h2>
-    <p id="end-stats"></p>
-    <button id="retry-btn">Try Again</button>
-  </div>
-</div>
-
-<script>
-
-let currentRow = 0;
-let currentCol = 0;
-const maxRows = 6;
-const maxCols = 5;
-
-  // popup elements
-const endOverlay = document.getElementById("end-overlay");
-const endTitle = document.getElementById("end-title");
-const endStats = document.getElementById("end-stats");
-const retryBtn = document.getElementById("retry-btn");
-
-// show popup
-function showEndPopup(won) {
-  const tries = currentRow + (won ? 1 : 0);
-  endTitle.textContent = won ? "🎉 You Win!" : "💀 Game Over";
-  endStats.textContent = `Solved in ${tries} / ${maxRows} tries`;
-  endOverlay.style.display = "flex";
-}
-
-// reset game
-function resetGame() {
-  endOverlay.style.display = "none";
-
-  targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-
-
-  currentRow = 0;
-  currentCol = 0;
-
-  [...board.children].forEach(row => {
-    [...row.children].forEach(cell => {
-      cell.textContent = "";
-      cell.className = "cell";
-    });
-  });
-
-  [...keyboardEl.children].forEach(key => {
-    key.classList.remove("correct", "present", "absent");
-  });
-
-  message.textContent = "";
-}
-
-retryBtn.addEventListener("click", resetGame);
-  
-  const WORDS = [
-  "abide","abhor","abode","abuse","about","above","acorn","acrid","adage","adapt",
-  "adept","admit","adobe","adore","adult","afire","afoul","again","agent","agape",
-  "agile","agony","alibi","alien","align","alley","alike","alive","alloy","allow",
-  "alone","along","aloof","altar","amber","amend","amity","ample","among","amuse",
-  "angle","angry","antic","anode","antic","apnea","apart","apple","apron","arena",
-  "argue","arise","armor","arson","artsy","asset","atlas","atone","audit","audio",
-  "avert","award","awash","awake","aware","awful","axial","azure","bacon","badge",
-  "bagel","baker","baler","balmy","bawdy","beach","beady","beard","beast","began",
-  "begun","being","belch","belie","belly","bench","berry","beret","beset","betel",
-  "bicep","bingo","birch","birth","bison","biter","blame","blast","bleak","bleed",
-  "blend","bless","blimp","blink","bliss","bloke","blown","blurb","board","boast",
-  "boney","bonus","booth","bough","boule","bound","bowel","boxer","brake","brand",
-  "brave","brawl","bread","break","breed","briar","bribe","brief","bring","brine",
-  "broil","broad","broth","brown","brunt","brush","bused","busty","butte","buyer",
-  "cabal","cairn","candy","canon","caper","caput","carat","cargo","carve","catch",
-  "cause","cavil","cedar","cease","cecil","cello","cider","civil","claim","clamp",
-  "clank","clash","class","clasp","clean","clear","cleft","climb","cling","clout",
-  "clown","clued","coach","coast","cobra","colon","comet","comic","condo","conch",
-  "conic","copse","couch","court","cover","covet","covey","crawl","creak","cream",
-  "credo","creep","crepe","cried","crime","crimp","crisp","croak","croup","crude",
-  "cruel","crush","crust","crypt","cubic","cumin","cunny","curio","curly","curse",
-  "cutie","cyber","datum","debar","debit","decay","decor","decal","decry","debut",
-  "defer","delay","demon","denim","dense","depot","derby","deter","devil","diary",
-  "dingo","diner","dirty","disco","ditch","diver","dodge","doing","doubt","dough",
-  "droit","droll","drain","drake","drift","drink","drive","drove","dryer","druid",
-  "drunk","dully","duchy","duvet","dwelt","dying","eager","easel","edict","elbow",
-  "elate","elect","elope","elide","ember","enemy","enema","entry","envoy","erase",
-  "erect","erect","ethic","ethos","evict","event","exact","exist","exalt","exert",
-  "fable","facet","fairy","faith","faint","falco","false","fancy","farce","fatal",
-  "favor","fecal","feast","femur","feral","fetch","fetus","fiend","fibre","field",
-  "final","finch","finer","first","fishy","flesh","flair","flame","flask","fleck",
-  "fleet","flock","flora","flour","fluke","flung","flush","flute","foist","folio",
-  "folio","force","foyer","folio","forte","forth","forty","frock","froth","frown",
-  "fruit","fudge","fugue","fully","fungi","funny","furor","fussy","fussy","fuzzy",
-  "gaudy","gavel","gayer","gauge","gayer","gaunt","gavel","gauge","ghoul","giant",
-  "given","girth","glade","glare","glaze","gleam","glean","glide","gloss","glyph",
-  "gloat","gloom","glory","glove","gourd","grace","grade","grain","grand","grant",
-  "grasp","grate","grave","gravy","great","greed","green","greet","grief","grime",
-  "grimy","grind","groan","groin","grove","gross","group","gruel","grunt","guile",
-  "gusto","habit","hatch","hater","haute","haunt","haven","hazel","heath","heard",
-  "hefty","hello","hence","homer","honor","horde","horny","house","howdy","hover",
-  "human","humid","humor","humph","hunch","hunky","hymen","icily","idiot","idyll",
-  "image","imply","inane","incur","index","inert","infer","inner","input","insol",
-  "ionic","issue","ivory","junta","jumbo","jumpy","joust","joist","knead","kneel",
-  "knelt","knack","knoll","known","known","koala","label","lacer","lapse","lanky",
-  "large","latch","later","latch","lathe","latch","latch","layer","leach","least",
-  "leant","leary","leave","leper","leach","leery","legal","lemon","leper","lesser",
-  "level","licit","light","lilac","liver","lodge","loamy","loath","locus","lofty",
-  "logic","loose","lorry","louse","lousy","lower","loyal","lumen","lunch","lunge",
-  "lupus","lusty","lying","macaw","macro","madly","mange","mango","march","marsh",
-  "marry","match","matey","mealy","meant","medal","medic","mecca","melon","merry",
-  "meson","metro","might","miner","mince","minor","minus","modal","model","money",
-  "month","moist","mocha","molar","mound","moult","mount","movie","mural","musky",
-  "music","muted","myrrh","naive","nadir","named","naval","navel","needy","nerdy",
-  "nerve","never","newer","newly","nicer","night","ninth","noble","nomad","nonce",
-  "noose","north","notch","novel","nurse","oaken","obese","ocean","octal","octet",
-  "offal","often","olden","olive","ombre","omega","onset","opium","opine","opera",
-  "order","organ","ought","outer","ounce","oval","ovary","ovate","oxide","owing",
-  "owner","oxide","paced","paddy","pagan","paint","palet","palsy","panel","pansy",
-  "panic","pasta","pasty","patch","payer","pecan","pedal","peach","pearl","pecan",
-  "penal","pence","perch","peril","pesky","phase","phone","piano","piece","pilot",
-  "pinch","pinky","pinto","piper","pivot","place","plaid","plane","plank","plaza",
-  "plead","pleat","plumb","plume","plush","point","poise","polka","poppy","porch",
-  "posey","poser","posit","pouch","pound","power","pride","pried","prime","print",
-  "prior","prism","prone","prong","prove","proxy","psalm","pupal","puree","purer",
-  "purge","pushy","quart","queen","query","quasi","quill","quilt","quoth","rabid",
-  "racer","rally","ranch","range","raper","raspy","ratty","reach","ready","rearm",
-  "rebus","recur","reedy","refer","refit","reign","relax","relic","remit","renew",
-  "repay","revel","rerun","reuse","right","rider","rifle","rival","river","rivet",
-  "roast","rodeo","rogue","rough","round","route","robin","roost","rotor","rouge",
-  "rouse","ruler","rumba","rural","rusty","sable","sally","salad","salon","salve",
-  "salty","satin","safer","saint","sappy","scent","scene","scoop","scope","score",
-  "scrap","scrub","scout","scrum","scamp","scale","scalp","scaly","scarce","scarf",
-  "scene","screw","seize","sense","sepia","serif","serum","seven","sever","shade",
-  "shady","shaft","shake","shale","shall","shame","shark","sharp","shard","shear",
-  "sheep","sheer","sheet","shelf","shelf","shelf","sherd","shift","shine","shiny",
-  "shirt","shock","shoot","shore","short","shove","shown","shrub","shuck","shunt",
-  "sieve","siege","silly","since","sinew","sinus","skate","skimp","skull","skirt",
-  "slack","slain","slam","slang","slant","slate","slime","slimy","sling","sloop",
-  "sloth","slump","slush","smack","small","smart","smear","smell","smile","smirk",
-  "smock","smoke","smote","snail","snake","snap","snare","snide","sniff","snore",
-  "snout","snuck","snowy","snuff","soapy","sober","socle","solar","solid","solve",
-  "sonar","sonic","sooth","sorry","sound","south","space","spade","spank","spasm",
-  "spate","speak","speck","spend","spent","sperm","spice","spied","spiel","spike",
-  "spill","spine","spite","split","spoil","spook","spool","spore","sport","spray",
-  "spree","sprig","spurn","spurt","squat","stack","staff","stage","stain","stair",
-  "stake","stale","stalk","stamp","stand","stare","start","stash","state","steak",
-  "steam","steel","steep","steer","stein","stent","stern","stew","stick","stiff",
-  "stilt","sting","stink","stint","stock","stoke","stole","stomp","stone","stool",
-  "stoop","store","stork","storm","story","stove","strap","straw","stray","strut",
-  "study","stuff","stunk","stunt","style","suave","sugar","suite","sunny","super",
-  "surge","surly","swami","swear","swill","swine","swirl","swish","swoop","swoon",
-  "sworn","swung","sybil","synod","table","tacit","tacky","taffy","taint","taken",
-  "taper","tapir","tardy","taste","tasty","tenth","teeth","tepid","teary","tenor",
-  "tense","tenet","tenth","terse","terra","theta","there","thief","threw","throb",
-  "thrum","thunk","thump","thong","thick","tidal","tiger","tithe","towel","today",
-  "toxic","toxin","tonal","tonic","topic","toxic","tract","trade","trail","train",
-  "trait","tramp","trash","trick","tried","tripe","truly","truss","trust","truth",
-  "trunk","tryst","tubal","tuber","tulip","tunic","tweak","tweed","twice","twist",
-  "tying","ulcer","ultra","unfed","unfit","unify","unmet","unzip","upset","upper",
-  "usage","usurp","utile","valet","valid","value","vapor","vault","vaunt","venue",
-  "verse","vests","vigor","viral","virus","vista","vital","vocal","vogue","vomit",
-  "voter","vying","wagon","wafer","wager","waken","waltz","waned","wanted","waste",
-  "watch","water","weary","weigh","welds","welch","whelp","whale","wharf","whine",
-  "whiny","whole","whose","width","widen","wight","wimpy","windy","wiped","wired",
-  "wispy","wiser","witch","woman","women","wonky","wound","woven","wrack","wraps",
-  "wrath","wreak","wreck","wring","wrung","wrote","xerox","xylem","yacht","yearn",
-  "yeast","yerba","youth","zebra","zonal","zesty"
-];
-
-
-  let targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
-  console.log("Target word:", targetWord); 
-
-  const board = document.getElementById("board");
-  const keyboardEl = document.getElementById("keyboard");
-  const message = document.getElementById("message");
-
-  // create board
-  for (let i = 0; i < maxRows; i++) {
-    const row = document.createElement("div");
-    row.className = "row";
-    for (let j = 0; j < maxCols; j++) {
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      row.appendChild(cell);
-    }
-    board.appendChild(row);
-  }
-
-  // create keyboard
-  const keys = "QWERTYUIOPASDFGHJKLZXCVBNM".split("");
-  keys.forEach(k => {
-    const keyBtn = document.createElement("div");
-    keyBtn.textContent = k;
-    keyBtn.className = "key";
-    keyBtn.addEventListener("click", () => handleKey(k));
-    keyboardEl.appendChild(keyBtn);
-  });
-
-  const enterKey = document.createElement("div");
-  enterKey.textContent = "ENTER";
-  enterKey.className = "key wide";
-  enterKey.addEventListener("click", () => handleKey("ENTER"));
-  keyboardEl.appendChild(enterKey);
-
-  const backKey = document.createElement("div");
-  backKey.textContent = "⌫";
-  backKey.className = "key wide";
-  backKey.addEventListener("click", () => handleKey("BACK"));
-  keyboardEl.appendChild(backKey);
-
-  // handle physical keyboard
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") handleKey("ENTER");
-    else if (e.key === "Backspace") handleKey("BACK");
-    else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
-  });
-
-  function handleKey(key) {
-    if (currentRow >= maxRows) return;
-    const row = board.children[currentRow];
-    if (key === "BACK") {
-      if (currentCol > 0) {
-        currentCol--;
-        row.children[currentCol].textContent = "";
-      }
-    } else if (key === "ENTER") {
-      if (currentCol === maxCols) submitGuess();
-    } else if (currentCol < maxCols) {
-      row.children[currentCol].textContent = key;
-      currentCol++;
-    }
-  }
-
-  async function submitGuess() {
-  const row = board.children[currentRow];
-  let guess = "";
-  for (let i = 0; i < maxCols; i++) guess += row.children[i].textContent;
-  guess = guess.toLowerCase(); 
-
-  if (!WORDS.includes(guess)) {
-    message.textContent = "Not in word list!";
-    return;
-  }
-
-  message.textContent = "";
-
-  // Flip animation + coloring
-  for (let i = 0; i < maxCols; i++) {
-    const cell = row.children[i];
-    cell.classList.add("flip");
-    cell.addEventListener("animationend", () => {
-      cell.classList.remove("flip");
-    }, { once: true });
-
-    const letter = cell.textContent.toLowerCase();
-    const keyBtn = [...keyboardEl.children].find(k => k.textContent.toUpperCase() === letter.toUpperCase());
-
-    if (letter === targetWord[i]) {
-      cell.classList.add("correct");
-      keyBtn?.classList.add("correct");
-    } else if (targetWord.includes(letter)) {
-      cell.classList.add("present");
-      if (!keyBtn?.classList.contains("correct")) keyBtn?.classList.add("present");
-    } else {
-      cell.classList.add("absent");
-      if (!keyBtn?.classList.contains("correct") && !keyBtn?.classList.contains("present")) keyBtn?.classList.add("absent");
-    }
-  }
-
-  if (guess === targetWord) {
-  showEndPopup(true);
-  return;
-}
-
-  currentRow++;
-currentCol = 0;
-
-if (currentRow === maxRows) {
-  showEndPopup(false);
-}
-}
-
-const creditsBtn = document.getElementById("credits-btn");
-const creditsOverlay = document.getElementById("credits-overlay");
-const creditsPopup = document.getElementById("credits-popup");
-
-creditsBtn.addEventListener("click", () => {
-  creditsOverlay.style.display = "flex";
-});
-
-creditsOverlay.addEventListener("click", () => {
-  creditsOverlay.style.display = "none";
-});
-
-creditsPopup.addEventListener("click", e => {
-  e.stopPropagation();
-});
-
-
-
-</script>
 </body>
 </html>
+

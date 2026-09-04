@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Wednesday Wordle | SHRIMP LAB</title>
+  <title>Wordle Pro</title>
 
   <style>
     * {
@@ -238,18 +239,6 @@
     }
 
     /* =======================
-       COUNTDOWN
-    ======================= */
-
-    #countdown {
-      margin-top: 18px;
-      color: #777;
-      font-size: 12px;
-      letter-spacing: 0.5px;
-      text-align: center;
-    }
-
-    /* =======================
        RESULT MODAL
     ======================= */
 
@@ -307,6 +296,56 @@
       background: #252525;
     }
 
+    /* =======================
+       CREDITS
+    ======================= */
+
+    #credits-btn {
+      position: fixed;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.6;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #credits-btn:hover {
+      opacity: 1;
+    }
+
+    #credits-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    #credits-popup {
+      background: #111;
+      border: 1px solid #333;
+      padding: 20px 30px;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    #credits-popup h2 {
+      margin-top: 0;
+    }
+
+    #credits-popup a {
+      color: #6aaa64;
+      text-decoration: none;
+    }
+
+    #credits-popup a:hover {
+      text-decoration: underline;
+    }
+
     @media (max-width: 430px) {
 
       body {
@@ -332,67 +371,17 @@
         min-width: 45px;
       }
     }
-
-      /* Credits button */
-#credits-btn {
-  position: fixed;
-  bottom: 10px;
-  width: 100%;
-  text-align: center;
-  font-size: 14px;
-  opacity: 0.6;
-  cursor: pointer;
-  user-select: none;
-}
-
-#credits-btn:hover {
-  opacity: 1;
-}
-
-/* Overlay */
-#credits-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-/* Popup */
-#credits-popup {
-  background: #111;
-  border: 1px solid #333;
-  padding: 20px 30px;
-  text-align: center;
-  border-radius: 8px;
-}
-
-#credits-popup h2 {
-  margin-top: 0;
-}
-
-#credits-popup a {
-  color: #6aaa64;
-  text-decoration: none;
-}
-
-#credits-popup a:hover {
-  text-decoration: underline;
-}
-
-
   </style>
+
 </head>
 
 <body>
 
-  <a href="../../index.html" class="back">← LAB</a>
+<a href="../../index.html" class="back">← BACK</a>
 
   <header>
-    <h1>WEDNESDAY WORDLE</h1>
-    <p class="subtitle">SHRIMP LAB • WEEKLY SPECIAL</p>
+    <h1>WORDLE PRO</h1>
+    <p class="subtitle">WORDLE PRO</p>
   </header>
 
   <div id="loading">
@@ -401,83 +390,128 @@
 
   <main id="game">
 
-    <div id="board"></div>
+<div id="board"></div>
 
-    <div id="message"></div>
+<div id="message"></div>
 
-    <div id="keyboard">
+<div id="keyboard">
 
-      <div class="keyboard-row">
-        <button class="key" data-key="Q">Q</button>
-        <button class="key" data-key="W">W</button>
-        <button class="key" data-key="E">E</button>
-        <button class="key" data-key="R">R</button>
-        <button class="key" data-key="T">T</button>
-        <button class="key" data-key="Y">Y</button>
-        <button class="key" data-key="U">U</button>
-        <button class="key" data-key="I">I</button>
-        <button class="key" data-key="O">O</button>
-        <button class="key" data-key="P">P</button>
-      </div>
+  <div class="keyboard-row">
+    <button class="key" data-key="Q">Q</button>
+    <button class="key" data-key="W">W</button>
+    <button class="key" data-key="E">E</button>
+    <button class="key" data-key="R">R</button>
+    <button class="key" data-key="T">T</button>
+    <button class="key" data-key="Y">Y</button>
+    <button class="key" data-key="U">U</button>
+    <button class="key" data-key="I">I</button>
+    <button class="key" data-key="O">O</button>
+    <button class="key" data-key="P">P</button>
+  </div>
 
-      <div class="keyboard-row">
-        <button class="key" data-key="A">A</button>
-        <button class="key" data-key="S">S</button>
-        <button class="key" data-key="D">D</button>
-        <button class="key" data-key="F">F</button>
-        <button class="key" data-key="G">G</button>
-        <button class="key" data-key="H">H</button>
-        <button class="key" data-key="J">J</button>
-        <button class="key" data-key="K">K</button>
-        <button class="key" data-key="L">L</button>
-      </div>
+  <div class="keyboard-row">
+    <button class="key" data-key="A">A</button>
+    <button class="key" data-key="S">S</button>
+    <button class="key" data-key="D">D</button>
+    <button class="key" data-key="F">F</button>
+    <button class="key" data-key="G">G</button>
+    <button class="key" data-key="H">H</button>
+    <button class="key" data-key="J">J</button>
+    <button class="key" data-key="K">K</button>
+    <button class="key" data-key="L">L</button>
+  </div>
 
-      <div class="keyboard-row">
-        <button class="key wide" data-key="ENTER">ENTER</button>
+  <div class="keyboard-row">
+    <button class="key wide" data-key="ENTER">ENTER</button>
 
-        <button class="key" data-key="Z">Z</button>
-        <button class="key" data-key="X">X</button>
-        <button class="key" data-key="C">C</button>
-        <button class="key" data-key="V">V</button>
-        <button class="key" data-key="B">B</button>
-        <button class="key" data-key="N">N</button>
-        <button class="key" data-key="M">M</button>
+    <button class="key" data-key="Z">Z</button>
+    <button class="key" data-key="X">X</button>
+    <button class="key" data-key="C">C</button>
+    <button class="key" data-key="V">V</button>
+    <button class="key" data-key="B">B</button>
+    <button class="key" data-key="N">N</button>
+    <button class="key" data-key="M">M</button>
 
-        <button class="key wide" data-key="BACKSPACE">⌫</button>
-      </div>
+    <button class="key wide" data-key="BACKSPACE">⌫</button>
+  </div>
 
-    </div>
+</div>
 
-    <div id="countdown"></div>
 
   </main>
 
-
   <!-- RESULT -->
+
   <div id="result">
 
-    <div class="result-box">
 
-      <h2 id="result-title">
-        You got it!
-      </h2>
+<div class="result-box">
 
-      <div class="result-word" id="result-word">
-        WORD
-      </div>
+  <h2 id="result-title">
+    You got it!
+  </h2>
 
-      <div class="result-stats" id="result-stats">
-        Solved in 4 guesses
-      </div>
+  <div class="result-word" id="result-word">
+    WORD
+  </div>
 
-      <button class="close-button" id="close-result">
-        CLOSE
-      </button>
+  <div class="result-stats" id="result-stats">
+    Solved in 4 guesses
+  </div>
 
-    </div>
+  <button class="close-button" id="close-result">
+    CLOSE
+  </button>
+
+</div>
+
 
   </div>
 
+  <!-- Credits button -->
+
+  <div id="credits-btn">Credits</div>
+
+  <!-- Credits popup overlay -->
+
+  <div id="credits-overlay">
+
+
+<div id="credits-popup">
+
+  <h2>CREDITS</h2>
+
+  <p>
+    <a
+      href="https://github.com/LEBRONGOAT2323"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      LEBRONGOAT2323 - Creator
+    </a>
+    <br>
+
+    <a
+      href="https://github.com/darkermango/5-Letter-words"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      darkermango - Word List
+    </a>
+    <br>
+
+    <a
+      href="https://www.nytimes.com/games/wordle/index.html"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Wordle - Original Wordle Game
+    </a>
+  </p>
+
+</div>
+
+  </div>
 
   <script>
 
@@ -522,9 +556,6 @@
     const message =
       document.getElementById("message");
 
-    const countdown =
-      document.getElementById("countdown");
-
     const result =
       document.getElementById("result");
 
@@ -542,94 +573,21 @@
 
 
     // ============================================================
-    // GET WEDNESDAY DATE
-    // ============================================================
-
-    function getWednesdayDate() {
-
-      const now = new Date();
-
-      const day = now.getDay();
-
-      const difference = 3 - day;
-
-      const wednesday = new Date(now);
-
-      wednesday.setDate(
-        now.getDate() + difference
-      );
-
-      wednesday.setHours(
-        0,
-        0,
-        0,
-        0
-      );
-
-      return wednesday;
-    }
-
-
-    // ============================================================
-    // DATE SEED
-    // ============================================================
-
-    function getDateSeed(date) {
-
-      const year =
-        date.getFullYear();
-
-      const month =
-        date.getMonth() + 1;
-
-      const day =
-        date.getDate();
-
-      return (
-        year * 10000 +
-        month * 100 +
-        day
-      );
-    }
-
-
-    // ============================================================
-    // GET WEEK'S WORD
-    // ============================================================
-
-    function getWednesdayWord() {
-
-      const wednesday =
-        getWednesdayDate();
-
-      const seed =
-        getDateSeed(wednesday);
-
-      const index =
-        seed % WORDS.length;
-
-      return WORDS[index];
-    }
-
-
-    // ============================================================
     // STORAGE KEY
     // ============================================================
 
-    function getStorageKey() {
-
-      const date =
-        getWednesdayDate();
-
-      const seed =
-        getDateSeed(date);
-
-      return `wednesdayWordle-${seed}`;
-    }
+    const STORAGE_KEY = "wordle-pro-game";
 
 
     // ============================================================
     // LOAD SAVED GAME
+    //
+    // IMPORTANT:
+    // If the previous game was completed, delete it.
+    // This means refreshing after solving starts a new word.
+    //
+    // If the player is still in the middle of the game,
+    // everything is restored exactly as it was.
     // ============================================================
 
     function loadGame() {
@@ -637,16 +595,48 @@
       try {
 
         const saved =
-          localStorage.getItem(
-            getStorageKey()
-          );
+          localStorage.getItem(STORAGE_KEY);
 
         if (!saved) {
-          return;
+          return false;
         }
 
         const data =
           JSON.parse(saved);
+
+
+        // --------------------------------------------------------
+        // COMPLETED GAME:
+        // Clear it so refresh creates a brand-new word.
+        // --------------------------------------------------------
+
+        if (data.gameOver === true) {
+
+          localStorage.removeItem(
+            STORAGE_KEY
+          );
+
+          return false;
+        }
+
+
+        // --------------------------------------------------------
+        // RESTORE ACTIVE GAME
+        // --------------------------------------------------------
+
+        if (
+          typeof data.answer === "string" &&
+          /^[A-Z]{5}$/.test(data.answer)
+        ) {
+
+          answer =
+            data.answer;
+
+        } else {
+
+          return false;
+        }
+
 
         guesses =
           Array.isArray(data.guesses)
@@ -663,11 +653,12 @@
             ? data.currentRow
             : guesses.length;
 
-        gameOver =
-          Boolean(data.gameOver);
+        gameOver = false;
 
         keyboardState =
           data.keyboardState || {};
+
+        return true;
 
       } catch (error) {
 
@@ -675,6 +666,12 @@
           "Could not restore saved game:",
           error
         );
+
+        localStorage.removeItem(
+          STORAGE_KEY
+        );
+
+        return false;
       }
     }
 
@@ -688,8 +685,9 @@
       try {
 
         localStorage.setItem(
-          getStorageKey(),
+          STORAGE_KEY,
           JSON.stringify({
+            answer,
             guesses,
             currentGuess,
             currentRow,
@@ -705,6 +703,30 @@
           error
         );
       }
+    }
+
+
+    // ============================================================
+    // CREATE NEW WORD
+    // ============================================================
+
+    function createNewWord() {
+
+      const randomIndex =
+        Math.floor(
+          Math.random() * WORDS.length
+        );
+
+      answer =
+        WORDS[randomIndex];
+
+      guesses = [];
+      currentGuess = "";
+      currentRow = 0;
+      gameOver = false;
+      keyboardState = {};
+
+      saveGame();
     }
 
 
@@ -746,7 +768,9 @@
           tile.dataset.col =
             col;
 
-          rowElement.appendChild(tile);
+          rowElement.appendChild(
+            tile
+          );
         }
 
         board.appendChild(
@@ -780,6 +804,7 @@
 
         let letter = "";
 
+
         if (
           row < guesses.length
         ) {
@@ -795,18 +820,22 @@
             currentGuess[col] || "";
         }
 
+
         tile.textContent =
           letter;
 
         if (letter) {
+
           tile.classList.add(
             "filled"
           );
         }
+
       });
 
 
       // Restore completed guesses
+
       guesses.forEach(
         (guess, row) => {
 
@@ -827,8 +856,10 @@
                   state
                 );
               }
+
             }
           );
+
         }
       );
 
@@ -854,6 +885,7 @@
 
 
       // Correct letters
+
       for (
         let i = 0;
         i < 5;
@@ -874,10 +906,12 @@
           guessLetters[i] =
             null;
         }
+
       }
 
 
       // Present letters
+
       for (
         let i = 0;
         i < 5;
@@ -887,6 +921,7 @@
         if (
           !guessLetters[i]
         ) {
+
           continue;
         }
 
@@ -903,6 +938,7 @@
           answerLetters[index] =
             null;
         }
+
       }
 
       return states;
@@ -920,6 +956,7 @@
         gameOver ||
         currentGuess.length >= 5
       ) {
+
         return;
       }
 
@@ -943,6 +980,7 @@
         gameOver ||
         currentGuess.length === 0
       ) {
+
         return;
       }
 
@@ -968,8 +1006,10 @@
         !gameReady ||
         gameOver
       ) {
+
         return;
       }
+
 
       if (
         currentGuess.length !== 5
@@ -1008,6 +1048,7 @@
 
 
       // Update keyboard
+
       const states =
         getGuessResult(
           submitted
@@ -1030,12 +1071,14 @@
 
 
       // Animation
+
       animateRow(
         currentRow
       );
 
 
       // WIN
+
       if (
         submitted === answer
       ) {
@@ -1048,6 +1091,7 @@
         gameOver = true;
 
         saveGame();
+
 
         setTimeout(() => {
 
@@ -1066,6 +1110,7 @@
 
 
       // LOSS
+
       if (
         currentRow >= 6
       ) {
@@ -1073,6 +1118,7 @@
         gameOver = true;
 
         saveGame();
+
 
         setTimeout(() => {
 
@@ -1112,6 +1158,7 @@
             );
 
           }, index * 100);
+
         }
       );
     }
@@ -1174,6 +1221,7 @@
               keyboardState[letter]
             );
           }
+
         });
     }
 
@@ -1218,10 +1266,11 @@
       resultTitle.textContent =
         won
           ? "You got it!"
-          : "Better luck next Wednesday!";
+          : "Better luck next time!";
 
       resultWord.textContent =
         answer;
+
 
       if (won) {
 
@@ -1238,6 +1287,7 @@
           "The word was revealed.";
       }
 
+
       result.style.display =
         "flex";
     }
@@ -1253,6 +1303,7 @@
 
         result.style.display =
           "none";
+
       }
     );
 
@@ -1272,6 +1323,7 @@
         const key =
           event.key.toUpperCase();
 
+
         if (
           key.length === 1 &&
           /^[A-Z]$/.test(key)
@@ -1281,6 +1333,7 @@
 
           return;
         }
+
 
         if (
           event.key ===
@@ -1292,6 +1345,7 @@
           return;
         }
 
+
         if (
           event.key ===
           "Enter"
@@ -1299,6 +1353,7 @@
 
           submitGuess();
         }
+
       }
     );
 
@@ -1318,6 +1373,7 @@
             const value =
               key.dataset.key;
 
+
             if (
               value === "ENTER"
             ) {
@@ -1333,68 +1389,13 @@
             } else {
 
               addLetter(value);
+
             }
+
           }
         );
+
       });
-
-
-    // ============================================================
-    // COUNTDOWN
-    // ============================================================
-
-    function updateCountdown() {
-
-      const now =
-        new Date();
-
-      let next =
-        new Date(
-          getWednesdayDate()
-        );
-
-      if (
-        now >= next
-      ) {
-
-        next.setDate(
-          next.getDate() + 7
-        );
-      }
-
-      const difference =
-        next - now;
-
-      const days =
-        Math.floor(
-          difference /
-          (1000 * 60 * 60 * 24)
-        );
-
-      const hours =
-        Math.floor(
-          (difference %
-            (1000 * 60 * 60 * 24)) /
-          (1000 * 60 * 60)
-        );
-
-      const minutes =
-        Math.floor(
-          (difference %
-            (1000 * 60 * 60)) /
-          (1000 * 60)
-        );
-
-      const seconds =
-        Math.floor(
-          (difference %
-            (1000 * 60)) /
-          1000
-        );
-
-      countdown.textContent =
-        `Next Wednesday Wordle in ${days}d ${hours}h ${minutes}m ${seconds}s`;
-    }
 
 
     // ============================================================
@@ -1436,18 +1437,8 @@
             await response.json();
 
 
-          // ==========================================
-          // IMPORTANT:
-          // DarkerMango's JSON is:
-          //
-          // {
-          //   "words": [...]
-          // }
-          //
-          // So we need data.words.
-          // ==========================================
-
           let rawWords;
+
 
           if (
             Array.isArray(data)
@@ -1473,6 +1464,7 @@
 
 
           // Clean words
+
           const cleaned =
             rawWords
               .map(word =>
@@ -1496,6 +1488,7 @@
 
 
           // Remove duplicates
+
           WORDS =
             [...new Set(cleaned)];
 
@@ -1517,6 +1510,7 @@
           lastError =
             error;
         }
+
       }
 
 
@@ -1538,29 +1532,35 @@
         await loadWords();
 
 
-        // Pick this week's word
-        answer =
-          getWednesdayWord();
+        // --------------------------------------------------------
+        // Try to restore an unfinished game.
+        //
+        // If no unfinished game exists, a completely new
+        // random word is created.
+        // --------------------------------------------------------
+
+        const restored =
+          loadGame();
 
 
-        console.log(
-          "Wednesday Wordle initialized."
-        );
+        if (!restored) {
 
-
-        // Restore progress
-        loadGame();
+          createNewWord();
+        }
 
 
         // Create board
+
         createBoard();
 
 
         // Restore board
+
         updateBoard();
 
 
         // Show game
+
         loading.style.display =
           "none";
 
@@ -1570,21 +1570,21 @@
         gameReady = true;
 
 
-        // Countdown
-        updateCountdown();
-
-        setInterval(
-          updateCountdown,
-          1000
-        );
-
-
-        if (gameOver) {
+        if (guesses.length > 0) {
 
           message.textContent =
-            "You've already played this Wednesday.";
-        }
+            "Game restored.";
 
+          setTimeout(() => {
+
+            if (!gameOver) {
+
+              message.textContent =
+                "";
+            }
+
+          }, 1200);
+        }
 
       } catch (error) {
 
@@ -1603,6 +1603,49 @@
 
 
     // ============================================================
+    // CREDITS
+    // ============================================================
+
+    const creditsBtn =
+      document.getElementById(
+        "credits-btn"
+      );
+
+    const creditsOverlay =
+      document.getElementById(
+        "credits-overlay"
+      );
+
+
+    creditsBtn.addEventListener(
+      "click",
+      () => {
+
+        creditsOverlay.style.display =
+          "flex";
+
+      }
+    );
+
+
+    creditsOverlay.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target ===
+          creditsOverlay
+        ) {
+
+          creditsOverlay.style.display =
+            "none";
+        }
+
+      }
+    );
+
+
+    // ============================================================
     // START
     // ============================================================
 
@@ -1610,20 +1653,5 @@
 
   </script>
 
-  <!-- Credits button -->
-<div id="credits-btn">Credits</div>
-
-<!-- Credits popup overlay -->
-<div id="credits-overlay">
-  <div id="credits-popup">
-    <h2>CREDITS</h2>
-    <p>
-      <a href="https://github.com/LEBRONGOAT2323" target="_blank">LEBRONGOAT2323 - Creater</a><br>
-      <a href="https://github.com/darkermango/5-Letter-words" target="_blank">darkermango - Word List</a><br>
-      <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank">Wordle - Orignal Wordle Game</a>
-    </p>
-  </div>
-</div>
 </body>
 </html>
-

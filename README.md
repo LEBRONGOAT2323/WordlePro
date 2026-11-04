@@ -2,7 +2,7 @@
 
 **Wordle, but Pro.** A browser-based word-guessing game built with plain HTML, CSS, and JavaScript.
 
-**▶ Play it:** https://lebrongoat2323.github.io/WordlePro/
+**▶ Play it:** `https://lebrongoat2323.github.io/WordlePro/`.
 
 ![WordlePro screenshot](screenshot.png)
 <!-- TODO: add a screenshot or GIF of a game in progress as screenshot.png -->

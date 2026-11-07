@@ -44,7 +44,14 @@ Then open `index.html` in any modern browser. There is nothing to install.
 
 ## How it works
 
-<!-- TODO: write 2-4 sentences. For example: where the word list comes from, how a guess is checked against the answer (including how repeated letters are handled), and how the keyboard colors update. -->
+How it works
+
+WordlePro is a single index.html file with no build step, framework, or backend.
+
+Word list: On load, the game fetches a JSON list of five-letter words from the darkermango word list, trying three mirrors until one responds. The same list provides both the answers and the valid guesses.
+Playing: A random word is chosen, and you get 6 guesses of 5 letters. Guesses must be real words from the list.
+Scoring: Each guess is checked in two passes: greens first, then yellows for remaining letters. This handles repeated letters the same way the original Wordle does.
+Saving: Progress is stored in localStorage, so a refresh mid-game restores your board. Once a game is finished, the next load starts a fresh word, which is what makes the game unlimited.
 
 ## Roadmap
 
